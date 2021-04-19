@@ -1,3 +1,4 @@
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -9,6 +10,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -17,42 +20,35 @@ import java.time.format.DateTimeFormatter;
 
 public class ServidorUDP extends Thread  {
 
-	
-	
-
-	private int id;
+	private int idC;
 	private int numeroArchivo;
 	private DatagramSocket servidor;
-	private DataOutputStream dos;
-	private DataInputStream dis;
 	private String RUTA;
 	private Hash hash;
 	private int numeroClientes;
-	private int fragmentos;
 	private int PUERTO;
-	private InetAddress address;
+	private InetAddress direccion;
 
 
-	public ServidorUDP(int idF, int Puerto, String rutaArchivo, int numerArch, int numeroCli, int pfragmentos) {
-		
+
+	public ServidorUDP(int idF, int Puerto, String rutaArchivo, int numerArch, int numeroCli) 
+	{
+
 		try {
-			address = InetAddress.getByName("localhost");
+
+			direccion = InetAddress.getLocalHost();
 			PUERTO = Puerto;
-			fragmentos = pfragmentos;
-			this.id = idF;
-			this.servidor = new DatagramSocket(Puerto);
+			idC = idF;
+			servidor = new DatagramSocket();
 			RUTA = rutaArchivo;
 			hash = new Hash();
 			numeroArchivo = numerArch;
 			numeroClientes=numeroCli;
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			// TODO: handle exception
 		}
-
-		
-
 	}
 
 
@@ -60,80 +56,60 @@ public class ServidorUDP extends Thread  {
 
 		try 
 		{
-			System.out.println("Servidor iniciado con el puerto:" + " " + servidor.getLocalPort());
+			//HASH
+			String hashh = calcularHash(RUTA);
+			ServerSocket s = new ServerSocket(PUERTO);
+			Socket socket = s.accept();
+			DataOutputStream dos =new DataOutputStream(socket.getOutputStream());
+			dos.writeUTF(hashh);
+			s.close();
+			
+			//ENVIO ARCHIVO
 			
 			
-
-
-			int paquetes=0;
 			File archivo1Envio = new File(RUTA);
-			String hashF =calcularHash(RUTA);
-			dos.write(numeroClientes);
-			dos.write(fragmentos);
-			dos.write(hashF.length());
-			dos.write(hashF.getBytes(StandardCharsets.UTF_8));
-			String nombreArchivo = RUTA.substring(15,RUTA.length());
-			
-			
-			long tamanio = archivo1Envio.length();
-			dos.writeLong(tamanio);
-			int idC = dis.read();
-			
-			
-			
-		
-			byte[] arreglo = archivo1Envio.getName().getBytes();
-			
-			DatagramPacket peticion = new DatagramPacket(arreglo, arreglo.length, address, PUERTO);
-			servidor.send(peticion);
-			
-			FileInputStream fis = new FileInputStream(archivo1Envio);
-			
-	        byte[] bArray = new byte[(int) archivo1Envio.length()];
-            fis.read(bArray);
-            fis.close();
-			
+			String nombreArchivo=RUTA.substring(5, RUTA.length());
+			long tamanio=archivo1Envio.length();
+
+			double numeroPaquetes = Math.ceil(((int)archivo1Envio.length())/1024);
+			String aa = String.valueOf(numeroPaquetes);
+			byte [] dataAEnviar = aa.getBytes();
+
+			DatagramPacket outaa =new DatagramPacket(dataAEnviar, dataAEnviar.length, direccion,PUERTO);
+			servidor.send(outaa);	
+
+
 			
 			long tiempoInicio = System.currentTimeMillis();
 			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss");  
 			LocalDateTime n = LocalDateTime.now(); 
 			String conversionTiempo = dtf.format(n);
-			String nombreLog="Logs/Servidor/"+conversionTiempo+"Servidor:"+id+".txt"; 
+			String nombreLog="Logs/Servidor/"+conversionTiempo+"Servidor"+idC+".txt";
 			
-			int frags = fragmentos;
-			
-			for(int i=0;i<bArray.length && frags <= arreglo.length; i++)
+
+			FileInputStream fis = new FileInputStream(archivo1Envio);
+			BufferedInputStream bis =new BufferedInputStream(fis);
+
+			for(double i=0; i<numeroPaquetes; i++)
 			{
-				byte[] message = new byte[1024];
-				DatagramPacket sendPacket = new DatagramPacket(message, fragmentos, address,PUERTO);
-				servidor.send(sendPacket);
-				frags += fragmentos;
-				paquetes++;
+				byte[] bytes = new byte[1024];
+
+				bis.read(bytes,0, bytes.length);
+				DatagramPacket out = new DatagramPacket(bytes, bytes.length, direccion, PUERTO);
+				servidor.send(out);		
 			}
-			
-			
-			if(numeroArchivo==1)
-			{
-				dos.write(1);
-				dos.flush();
-			}
-			else if (numeroArchivo==2)
-			{
-				dos.write(2);
-				dos.flush();
-			}
-		
-			
+			bis.close();
+			servidor.close();
 			long finalTiempo = System.currentTimeMillis();
 			long tiempoTotal = finalTiempo - tiempoInicio;
-			int estadoT=dis.read();
-			
-			generarLog(nombreLog, nombreArchivo, tamanio, paquetes, tiempoTotal, idC, estadoT, hashF);
 			
 			
-			dis.close();
-			dos.close();
-			
+			//GENERAR LOG
+
+			generarLog(nombreLog, nombreArchivo, tamanio, numeroPaquetes, tiempoTotal, idC, hashh);
+
+			 
+
 
 		} 
 		catch (Exception ex) {
@@ -142,14 +118,14 @@ public class ServidorUDP extends Thread  {
 
 	}
 
-	
+
 
 	private String calcularHash(String ruta) throws IOException
 	{
 		return hash.calcularHash(ruta);
 	}
-	
-	private void generarLog(String nombre, String nombreArchivo, long tamanioArchivo, int pPaquetes, long tiempo, int idC, int estado, String hashCalculado) throws FileNotFoundException, UnsupportedEncodingException
+
+	private void generarLog(String nombre, String nombreArchivo, long tamanioArchivo, double pPaquetes, long tiempo, int idC, String hashCalculado) throws FileNotFoundException, UnsupportedEncodingException
 	{
 		PrintWriter es = new PrintWriter(nombre, "UTF-8");
 		es.println("Nombre del archivo: "+nombreArchivo);
@@ -157,10 +133,9 @@ public class ServidorUDP extends Thread  {
 		es.println("Id Cliente transferencia: "+idC);
 		es.println("Tiempo de transferencia Total: "+tiempo+"milisegundos");
 		es.println("Paquetes Transmitidos: "+pPaquetes);
-		es.println("Estado de transferencia: "+estado);
 		es.println("Hash que se envio: "+ hashCalculado);
 		es.close();
-		
+
 	}
 
 

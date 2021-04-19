@@ -35,8 +35,7 @@ public class Servidor {
 			return;
 		}
 		
-		System.out.println("¿En cuanto desea fragmentar el archivo? (Hasta 64KB)");
-		int h = Integer.parseInt(myInput.nextLine());
+		
 		
 		myInput.close();
 		
@@ -45,7 +44,7 @@ public class Servidor {
 		for(int j =1; j<=o;j++)
 		{
 			int puerto = 5555+j;
-			ServidorUDP conexion = new ServidorUDP(j,puerto, rutaArchivo,i,o,h);
+			ServidorUDP conexion = new ServidorUDP(j,puerto, rutaArchivo,i,o);
 			conexion.start();
 		}
 
