@@ -36,7 +36,7 @@ public class ServidorUDP extends Thread  {
 
 		try {
 
-			direccion = InetAddress.getByName("172.31.54.52");
+			direccion = InetAddress.getByName("192.168.163.128");
 			PUERTO = Puerto;
 			idC = idF;
 			servidor = new DatagramSocket();
