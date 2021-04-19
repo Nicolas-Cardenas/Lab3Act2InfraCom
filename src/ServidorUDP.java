@@ -36,7 +36,7 @@ public class ServidorUDP extends Thread  {
 
 		try {
 
-			direccion = InetAddress.getLocalHost();
+			direccion = InetAddress.getByName("192.168.0.22");
 			PUERTO = Puerto;
 			idC = idF;
 			servidor = new DatagramSocket();
@@ -68,7 +68,7 @@ public class ServidorUDP extends Thread  {
 			
 			
 			File archivo1Envio = new File(RUTA);
-			String nombreArchivo=RUTA.substring(5, RUTA.length());
+			String nombreArchivo=RUTA.substring(15, RUTA.length());
 			long tamanio=archivo1Envio.length();
 
 			double numeroPaquetes = Math.ceil(((int)archivo1Envio.length())/1024);

@@ -51,7 +51,7 @@ public class ClienteUDP extends Thread{
 		{
 			//HASH del archivo 
 
-			Socket socket = new Socket("localhost", PUERTO);
+			Socket socket = new Socket("192.168.0.22", PUERTO);
 			DataInputStream dis =new DataInputStream(socket.getInputStream());
 			String hashh =dis.readUTF();
 			socket.close();
@@ -128,7 +128,7 @@ public class ClienteUDP extends Thread{
 						temporizador.cancel();
 					}		
 				}
-			}, 10000);
+			}, 5000);
 		}
 		catch (Exception e) 
 		{
@@ -156,7 +156,7 @@ public class ClienteUDP extends Thread{
 						temporizador.cancel();
 					}		
 				}
-			}, 10000);
+			}, 5000);
 
 			byte[] bytes = new byte[1024];
 			DatagramPacket dataRecibir = new DatagramPacket(bytes, bytes.length);
