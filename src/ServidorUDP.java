@@ -36,7 +36,7 @@ public class ServidorUDP extends Thread  {
 
 		try {
 
-			direccion = InetAddress.getByName("192.168.0.4");
+		
 			PUERTO = Puerto;
 			idC = idF;
 			servidor = new DatagramSocket();
@@ -66,6 +66,7 @@ public class ServidorUDP extends Thread  {
 			
 			//ENVIO ARCHIVO
 			
+			InetAddress direccion = InetAddress.getByName("192.168.0.4");
 			
 			File archivo1Envio = new File(RUTA);
 			String nombreArchivo=RUTA.substring(15, RUTA.length());

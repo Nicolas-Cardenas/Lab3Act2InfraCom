@@ -128,7 +128,7 @@ public class ClienteUDP extends Thread{
 						temporizador.cancel();
 					}		
 				}
-			}, 5000);
+			}, 10000);
 		}
 		catch (Exception e) 
 		{
@@ -156,7 +156,7 @@ public class ClienteUDP extends Thread{
 						temporizador.cancel();
 					}		
 				}
-			}, 5000);
+			}, 10000);
 
 			byte[] bytes = new byte[1024];
 			DatagramPacket dataRecibir = new DatagramPacket(bytes, bytes.length);
