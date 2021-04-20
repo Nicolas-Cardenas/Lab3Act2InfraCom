@@ -66,7 +66,7 @@ public class ServidorUDP extends Thread  {
 			
 			//ENVIO ARCHIVO
 			
-			InetAddress direccion = InetAddress.getByName("192.168.1.74");
+			InetAddress direccion = InetAddress.getByName("192.168.1.77");
 			
 			File archivo1Envio = new File(RUTA);
 			String nombreArchivo=RUTA.substring(15, RUTA.length());
