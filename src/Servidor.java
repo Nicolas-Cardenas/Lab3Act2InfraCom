@@ -16,8 +16,6 @@ public class Servidor {
 		System.out.println("El archivo 2 corresponde a 250MB");
 	
 		int i = Integer.parseInt(myInput.nextLine());
-		
-		
 		if(i==1)
 		{
 			System.out.println("El archivo # " + i+" de 100MB será enviado");
@@ -35,11 +33,7 @@ public class Servidor {
 			return;
 		}
 		
-		
-		
 		myInput.close();
-		
-		
 		
 		for(int j =1; j<=o;j++)
 		{

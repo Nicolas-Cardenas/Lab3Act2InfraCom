@@ -51,7 +51,7 @@ public class ClienteUDP extends Thread{
 		{
 			//HASH del archivo 
 
-			Socket socket = new Socket("localhost", PUERTO);
+			Socket socket = new Socket("192.168.1.77", PUERTO);
 			DataInputStream dis =new DataInputStream(socket.getInputStream());
 			String hashh =dis.readUTF();
 			socket.close();
